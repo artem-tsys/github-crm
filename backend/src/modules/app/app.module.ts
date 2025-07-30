@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from "@nestjs/config";
 import { typeOrmConfig } from "../../database/config/typeorm.config";
+import { AuthModule } from "../auth/auth.module";
+import { UsersModule } from "../user/user.module";
 import { AppController } from "./app.controller";
 import appConfig from './config/app.config';
 import { MongooseModule } from "@nestjs/mongoose";
@@ -15,6 +17,9 @@ import { mongooseConfig } from "../../database/config/mongoose.config";
 	  }),
 	  TypeOrmModule.forRootAsync(typeOrmConfig),
 	  MongooseModule.forRootAsync(mongooseConfig),
+	  
+	  UsersModule,
+	  AuthModule
   ],
   controllers: [AppController],
   providers: [],

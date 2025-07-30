@@ -1,9 +1,14 @@
-FROM node:22.5.1-alpine AS builder
-
-WORKDIR /usr/src/app
-
-COPY . .
+FROM node:22.5.1-alpine AS base
+WORKDIR /app
+COPY package*.json ./
 RUN npm install
-RUN npm run build
 
+# Development stage
+FROM base AS dev
+CMD ["npm", "run", "start:dev"]
+
+# Production stage
+FROM base AS prod
+COPY . .
+RUN npm run build
 CMD ["node", "dist/main"]
