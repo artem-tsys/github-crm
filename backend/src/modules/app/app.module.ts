@@ -1,9 +1,10 @@
+import { HttpModule } from "@nestjs/axios";
 import { Module } from '@nestjs/common';
 import { ConfigModule } from "@nestjs/config";
 import { typeOrmConfig } from "../../database/config/typeorm.config";
 import { AuthModule } from "../auth/auth.module";
+import { ProjectModule } from "../project/project.module";
 import { UsersModule } from "../user/user.module";
-import { AppController } from "./app.controller";
 import appConfig from './config/app.config';
 import { MongooseModule } from "@nestjs/mongoose";
 import { TypeOrmModule } from "@nestjs/typeorm";
@@ -18,10 +19,11 @@ import { mongooseConfig } from "../../database/config/mongoose.config";
 	  TypeOrmModule.forRootAsync(typeOrmConfig),
 	  MongooseModule.forRootAsync(mongooseConfig),
 	  
+	  HttpModule,
 	  UsersModule,
-	  AuthModule
+	  AuthModule,
+	  ProjectModule
   ],
-  controllers: [AppController],
   providers: [],
 })
 export class AppModule {}
