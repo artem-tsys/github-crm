@@ -4,8 +4,17 @@ import { Project } from '../entities/project.entity';
 import { ProjectRepository } from "../repositories/project.repository";
 import { FetchProjectsService } from '../services/fetch-project.service';
 
+
+/**
+ * Service for managing user projects.
+ * Add, update, and read information about GitHub projects.
+ */
 @Injectable()
 export class ProjectService {
+/**
+ * @param projectRepository Project repository
+ * @param fetchProjectsService Service for fetching data from GitHub
+ */
 	constructor(
 		private readonly projectRepository: ProjectRepository,
 		private readonly fetchProjectsService: FetchProjectsService,
@@ -18,7 +27,13 @@ export class ProjectService {
 		}
 		return { owner, name };
 	}
-	
+
+/**
+ * Adds a new project or updates an existing one for the user.
+ * @param path Project path in owner/repo format
+ * @param user User
+ * @returns Added or updated project
+ */
 	async addProject(path: string, user: User): Promise<Project> {
 		const filter = this.parsePath(path);
 		let project = await this.projectRepository.findByOwnerAndName(filter);
@@ -28,10 +43,16 @@ export class ProjectService {
 			});
 			return project;
 		}
-		
 		return await this.createNewProject(filter, user);
 	}
-	
+
+/**
+ * Updates project data from GitHub and links it to the user.
+ * @param project Project
+ * @param user User
+ * @returns Updated project
+ * @throws NotFoundException if the repository is not found
+ */
 	async updateProject(project: Project, user: User): Promise<Project> {
 		const data = await this.fetchProjectsService.fetchData(project.owner, project.name);
 		if (!data) throw new NotFoundException('GitHub repository not found');
@@ -46,7 +67,14 @@ export class ProjectService {
 		
 		return updatedProject;
 	}
-	
+
+/**
+ * Creates a new project and links it to the user.
+ * @param filter owner and name
+ * @param user User
+ * @returns Created project
+ * @throws NotFoundException if the repository is not found
+ */
 	async createNewProject(filter, user) {
 		const data = await this.fetchProjectsService.fetchData(filter.owner, filter.name);
 		if (!data) throw new NotFoundException('GitHub repository not found');
@@ -56,7 +84,12 @@ export class ProjectService {
 		
 		return project;
 	}
-	
+
+/**
+ * Returns all projects of the user.
+ * @param user User
+ * @returns Array of projects
+ */
 	async getProjects(user: User) {
 		return await this.projectRepository.findAllByUserId(user.id);
 	}

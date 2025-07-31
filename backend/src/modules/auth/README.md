@@ -1,62 +1,67 @@
 # Authentication Module
 
-This module handles user registration, login, and route protection using JWT in a NestJS backend.
-
----
+This module provides user registration, login, and JWT-based route protection for the backend application.
 
 ## Structure
 
-```
-src/
-├── auth/
-│   ├── controllers/
-│   │   ├── auth.controller.ts      # HTTP endpoints /auth/*
-│   ├── services/
-│   │   ├── auth.service.ts         # Registration and login logic
-│   ├── dtos/
-│   │   ├── auth.dto.ts             # Input validation DTOs
-│   ├── strategies/
-│   │   ├── jwt.strategy.ts         # JWT validation strategy
-│   ├── guards/
-│   │   ├── jwt-auth.guard.ts       # JWT guard
-├── users/
-│   ├── entities/
-│   │   ├── user.entity.ts          # User database entity
-│   ├── services/
-│   │   ├── user.service.ts        # User DB logic
-```
+- **Controller:** `AuthController` — handles HTTP endpoints for registration and login.
+- **Service:** `AuthService` — contains authentication logic (register, sign-in).
+- **DTOs:** `RegisterDto`, `LoginDto` — validate input data for registration and login.
+- **Strategy:** `JwtStrategy` — validates JWT tokens and extracts user.
+- **Guard:** `JwtAuthGuard` — protects routes using JWT authentication.
+- **Decorator:** `GetUser` — extracts user or user property from request.
 
----
+## Main Features
 
-## Registration
+- Register a new user with email and password.
+- Sign in and receive a JWT access token.
+- Protect routes using JWT authentication.
+- Validate user input with DTOs.
 
-**POST** `/auth/register`
+## Endpoints
 
-### Request Body:
+- `POST /auth/register` — Register a new user
+- `POST /auth/sign-in` — Sign in and get JWT token
 
+## Validation
+
+- `email`: required, must be a valid email
+- `password`: required, minimum 6 characters
+
+## Security
+
+- All endpoints are protected using JWT authentication (except registration and login).
+
+## Usage Example
+
+To register a user:
 ```json
+POST /auth/register
 {
   "email": "user@example.com",
   "password": "123456"
 }
 ```
 
-### Validation:
+To sign in:
+```json
+POST /auth/sign-in
+{
+  "email": "user@example.com",
+  "password": "123456"
+}
+```
 
-* `email`: required, must be a valid email
-* `password`: required, minimum 6 characters
-
-### Response:
-
+Response:
 ```json
 {
-  "id": "...",
-  "email": "user@example.com",
-  "createdAt": "..."
+  "access_token": "...jwt..."
 }
 ```
 
 ---
+
+For more details, see the code documentation in each file.
 
 ## Login
 

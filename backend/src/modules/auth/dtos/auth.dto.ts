@@ -1,5 +1,8 @@
 import { IsEmail, IsString, MinLength } from 'class-validator';
 
+/**
+ * DTO for user registration.
+ */
 export class RegisterDto {
 	@IsEmail()
 	email: string;

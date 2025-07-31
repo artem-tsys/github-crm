@@ -3,17 +3,31 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from "@nestjs/config";
 import { firstValueFrom } from "rxjs";
 
+/**
+ * Service for fetching GitHub project data via API.
+ */
 @Injectable()
 export class FetchProjectsService {
 	private readonly baseUrl: string;
-	
+
+/**
+ * @param http HTTP service
+ * @param config Configuration service
+ */
 	constructor(
 		private readonly http: HttpService,
 		private readonly config: ConfigService,
 	) {
 		this.baseUrl = this.config.getOrThrow<string>('GITHUB_API_URL');
 	}
-	
+
+/**
+ * Fetches project data from GitHub API.
+ * @param owner Repository owner
+ * @param repo Repository name
+ * @returns Object with project data or null if not found
+ * @throws Error if GitHub API request fails
+ */
 	async fetchData(owner: string, repo: string) {
 		try {
 			const url = `${this.baseUrl}/${owner}/${repo}`;
