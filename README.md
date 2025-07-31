@@ -1,40 +1,73 @@
-# Тестове завдання на позицію Full-stack розробника
+# GitHub CRM Project
 
-## Стек технологій:
-1. JavaScript/TypeScript, Node.js
-2. React.js
-3. PostgresQL, MongoDB
+A full-stack application for managing public GitHub projects. Includes user authentication, project tracking, and integration with GitHub API.
 
-## Опис завдання:
-Розробіть просту систему управління проєктами (CRM) для публічних проєктів GitHub.
+## Project Structure
 
-### Основні функціональні вимоги:
-- Система повинна підтримувати реєстрацію та авторизацію користувачів.
-- Користувачі повинні мати можливість реєструватися за допомогою електронної пошти та паролю.
-- Після входу в систему користувач переходить до списку проєктів, який відображає наступні дані:
-    - Власник проєкту
-    - Назва проєкту
-    - URL проєкту
-    - Кількість зірок (stars)
-    - Кількість відгалужень (forks)
-    - Кількість відкритих питань (issues)
-    - Дата створення у форматі UTC Unix timestamp
-    - Кнопки: оновити та видалити
+- `backend/` — NestJS API (authentication, project management, user management)
+- `frontend/` — React.js client (UI for authentication and project list)
 
-### Додаткові функціональні вимоги:
-- Для додавання нового репозиторію GitHub користувач повинен вказати лише шлях до репозиторію, наприклад: `facebook/react`.
-- Після додавання система у фоновому режимі повинна запитати дані з GitHub API та зберегти всі необхідні поля в базу даних.
+## Technologies
 
-### Інші вимоги:
-- Ви можете використовувати будь-які бібліотеки UI для React.js.
-- Дизайн (UI/UX) не має значення.
-- Система має швидко підніматись, радимо використати Docker та Docker Compose.
+- Node.js, TypeScript
+- NestJS (backend)
+- React.js (frontend)
+- PostgreSQL, MongoDB
+- Docker, Docker Compose
 
-### Додаткові рекомендації:
-- Зверніть увагу на структуру проєкту, вона має бути чистою і зрозумілою.
-- Код повинен бути добре документований та відповідати загальноприйнятим стандартам.
-- Використовуйте Git для контролю версій та надайте посилання на репозиторій із завданням.
+## Main Features
 
-## Критерії оцінки:
-- Коректність роботи системи відповідно до вимог.
-- Якість та зрозумілість коду.
+- User registration and login (JWT authentication)
+- Add GitHub projects by repository path (e.g., `facebook/react`)
+- View project details: owner, name, URL, stars, forks, issues, creation date
+- Update and delete projects
+- Data fetched from GitHub API and stored in database
+
+## How to Run
+
+1. Clone the repository
+2. Create `.env.dev` files in both `backend/` and `frontend/` folders and set required variables (see below)
+3. Build and start with Docker Compose:
+   ```sh
+   docker-compose up --build
+   ```
+4. Access backend at `http://localhost:3004`, frontend at `http://localhost:3000`
+
+## Environment Variables
+
+Backend:
+```
+JWT_SECRET=your_jwt_secret
+GITHUB_API_URL=https://api.github.com/repos
+POSTGRES_HOST=...
+POSTGRES_PORT=...
+POSTGRES_USER=...
+POSTGRES_PASSWORD=...
+POSTGRES_DB=...
+```
+
+Frontend:
+```
+VITE_API_URL=http://localhost:3004
+```
+
+## API Endpoints
+
+- `POST /auth/register` — Register user
+- `POST /auth/sign-in` — Login and get JWT
+- `GET /projects` — Get user's projects
+- `POST /projects` — Add new project
+
+## Documentation
+
+- See module-level README files in `backend/src/modules/*` for details on each backend module.
+
+## Dependencies
+
+- `@nestjs/jwt`, `passport-jwt`, `bcrypt`, `class-validator` (backend)
+- `react`, `axios`, `vite` (frontend)
+
+## License
+
+MIT
+
