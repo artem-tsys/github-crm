@@ -79,7 +79,7 @@ export class ProjectService {
 		const data = await this.fetchProjectsService.fetchData(filter.owner, filter.name);
 		if (!data) throw new NotFoundException('GitHub repository not found');
 		
-		const project = await this.projectRepository.create(data, user);
+		const project = await this.projectRepository.create(data);
 		await this.projectRepository.updateLink(project.id, user.id);
 		
 		return project;

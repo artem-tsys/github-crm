@@ -1,9 +1,9 @@
 FROM node:22.5.1-alpine AS base
 WORKDIR /app
-COPY package*.json ./
-RUN npm install
 
-# Development stage
-FROM base AS dev
-CMD ["npm", "run", "start:dev"]
+COPY . .
+RUN npm install
+RUN npm run build
+
+CMD ["node", "dist/main"]
 
