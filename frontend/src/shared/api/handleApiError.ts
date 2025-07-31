@@ -17,7 +17,7 @@ interface ApiError {
 export function handleApiError(e: unknown, defaultMessage: string): FieldError[] | null {
   const err = e as ApiError;
   if (err?.response?.status === 400 && Array.isArray(err?.response?.data?.message)) {
-    // Валідаційні помилки
+    // validation errors
     return err.response.data?.message.map((msg: string) => {
       const [field] = msg.split(' ');
       return { name: field.toLowerCase(), errors: [msg] };
