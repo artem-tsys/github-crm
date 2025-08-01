@@ -27,7 +27,7 @@ This module provides functionality for managing GitHub projects within the appli
 - `stars`: Number of stars
 - `forks`: Number of forks
 - `issues`: Number of open issues
-- `createdAtUnix`: Repository creation date (Unix timestamp)
+- `createdAt`: Repository creation date (Unix timestamp)
 - `addedAt`: Date when the project was added to the system
 - `users`: Users linked to the project
 

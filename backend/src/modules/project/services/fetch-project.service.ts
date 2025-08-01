@@ -41,7 +41,7 @@ export class FetchProjectsService {
 				stars: data.stargazers_count,
 				forks: data.forks_count,
 				issues: data.open_issues_count,
-				createdAtUnix: Math.floor(new Date(data.created_at).getTime() / 1000),
+				createdAt: Math.floor(new Date(data.created_at).getTime() / 1000),
 			};
 		} catch (error) {
 			if (error.response?.status === 404) return null;

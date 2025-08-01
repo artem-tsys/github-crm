@@ -25,7 +25,7 @@ export class Project {
 	issues: number;
 	
 	@Column({ type: 'bigint' })
-	createdAtUnix: number;
+	createdAt: number;
 	
 	@CreateDateColumn()
 	addedAt: Date;
