@@ -1,11 +1,10 @@
-version: '3.8'
 services:
   frontend:
     build: ./frontend
     ports:
       - '3000:3000'
     env_file:
-      - frontend/.env.dev
+      - frontend/.env.local
     depends_on:
       - backend
 
@@ -14,7 +13,7 @@ services:
     ports:
       - '3004:3004'
     env_file:
-      - backend/.env.dev
+      - backend/.env.local
     depends_on:
       - postgres
       - mongo

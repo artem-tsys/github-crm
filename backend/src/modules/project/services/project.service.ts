@@ -27,6 +27,28 @@ export class ProjectService {
 		}
 		return { owner, name };
 	}
+	
+	/**
+	 * Updates project data from GitHub and links it to the user.
+	 * @param project Project
+	 * @param user User
+	 * @returns Updated project
+	 * @throws NotFoundException if the repository is not found
+	 */
+	private async updateProject(project: Project, user: User): Promise<Project> {
+		const data = await this.fetchProjectsService.fetchData(project.owner, project.name);
+		if (!data) throw new NotFoundException('GitHub repository not found');
+		
+		project.url = data.url;
+		project.stars = data.stars;
+		project.forks = data.forks;
+		project.issues = data.issues;
+		
+		const updatedProject = await this.projectRepository.save(project);
+		await this.projectRepository.updateLink(project.id, user.id);
+		
+		return updatedProject;
+	}
 
 /**
  * Adds a new project or updates an existing one for the user.
@@ -34,7 +56,7 @@ export class ProjectService {
  * @param user User
  * @returns Added or updated project
  */
-	async addProject(path: string, user: User): Promise<Project> {
+	public async addProject(path: string, user: User): Promise<Project> {
 		const filter = this.parsePath(path);
 		let project = await this.projectRepository.findBy(filter);
 		if(project) {
@@ -55,7 +77,7 @@ export class ProjectService {
 	 * @throws NotFoundException if the project doesn't exist
 	 * @throws ForbiddenException if the project is not linked to the user
 	 */
-	async refreshProject(id: string, user: User): Promise<Project> {
+	public async refreshProject(id: string, user: User): Promise<Project> {
 		const project = await this.projectRepository.findBy({ id });
 		if (!project) throw new NotFoundException('Project not found');
 		
@@ -66,35 +88,13 @@ export class ProjectService {
 	}
 
 /**
- * Updates project data from GitHub and links it to the user.
- * @param project Project
- * @param user User
- * @returns Updated project
- * @throws NotFoundException if the repository is not found
- */
-	async updateProject(project: Project, user: User): Promise<Project> {
-		const data = await this.fetchProjectsService.fetchData(project.owner, project.name);
-		if (!data) throw new NotFoundException('GitHub repository not found');
-		
-		project.url = data.url;
-		project.stars = data.stars;
-		project.forks = data.forks;
-		project.issues = data.issues;
-		
-		const updatedProject = await this.projectRepository.save(project);
-		await this.projectRepository.updateLink(project.id, user.id);
-		
-		return updatedProject;
-	}
-
-/**
  * Creates a new project and links it to the user.
  * @param filter owner and name
  * @param user User
  * @returns Created project
  * @throws NotFoundException if the repository is not found
  */
-	async createNewProject(filter, user) {
+	public async createNewProject(filter, user) {
 		const data = await this.fetchProjectsService.fetchData(filter.owner, filter.name);
 		if (!data) throw new NotFoundException('GitHub repository not found');
 		
@@ -109,7 +109,7 @@ export class ProjectService {
  * @param user User
  * @returns Array of projects
  */
-	async getProjects(user: User) {
+	public async getProjects(user: User) {
 		return await this.projectRepository.findAllByUserId(user.id);
 	}
 	
@@ -121,7 +121,7 @@ export class ProjectService {
 	 * @param user User
 	 * @throws NotFoundException if project not found or not accessible
 	 */
-	async deleteProject(id: string, user: User): Promise<void> {
+	public async deleteProject(id: string, user: User): Promise<void> {
 		const project = await this.projectRepository.findBy({ id });
 		if (!project) throw new NotFoundException('Project not found');
 		
