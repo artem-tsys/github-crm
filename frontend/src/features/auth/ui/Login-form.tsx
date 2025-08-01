@@ -20,13 +20,13 @@ import { useSignIn } from '../model/useSignIn';
 
 export const LoginForm = () => {
 	const [form] = Form.useForm<SignInDto>();
-	const { submit, errors, isSubmitting } = useSignIn();
+	const { submit, fieldErrors, formError, isSubmitting } = useSignIn();
 
 	useEffect(() => {
-		if (errors) {
-			form.setFields(mapErrorsToAntd(errors));
+		if (fieldErrors) {
+			form.setFields(mapErrorsToAntd(fieldErrors));
 		}
-	}, [errors, form])
+	}, [fieldErrors, form]);
 	
 	return (
 	<Form form={form} onFinish={submit} layout="vertical">
@@ -43,6 +43,9 @@ export const LoginForm = () => {
 		  Sign In
 		</Button>
 	  </Form.Item>
+		{formError && (
+			<Form.Item validateStatus="error" help={formError} />
+		)}
 	</Form>
 	);
 };

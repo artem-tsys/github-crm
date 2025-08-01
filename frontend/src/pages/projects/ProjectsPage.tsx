@@ -1,21 +1,45 @@
-import { Typography } from 'antd';
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useProjects } from "../../features/projects/model/useProjects";
+import { AddProjectForm } from "../../features/projects/ui/Add-project-form";
+import { ProjectsTable } from "../../features/projects/ui/Projects-table";
+import { Typography, Card, Alert, Spin } from 'antd';
+import styles from "./project-page.module.scss";
 
 const { Title } = Typography;
 
 export const ProjectsPage = () => {
-  const navigate = useNavigate();
-  useEffect(() => {
-    const token = localStorage.getItem('access_token');
-    if (!token) {
-      navigate('/sign-in');
-    }
-  }, [navigate]);
-
-  return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-      <Title level={2}>Projects</Title>
-    </div>
-  );
+	const { projects, loading, error, deleteOne, refreshOne, refetch } = useProjects();
+	
+	return (
+		<div className={styles.page}>
+			<Card className={styles.card} bordered={false}>
+				<Title level={2}>Your GitHub Projects</Title>
+				
+				<AddProjectForm onSuccess={refetch} />
+				
+				{loading && (
+					<div className={styles.centered}>
+						<Spin size="large" />
+					</div>
+				)}
+				
+				{error && (
+					<Alert
+						type="error"
+						message="Failed to load projects"
+						description={error}
+						showIcon
+						className={styles.alert}
+					/>
+				)}
+				
+				{!loading && !error && (
+					<ProjectsTable
+						projects={projects}
+						onDelete={deleteOne}
+						onRefresh={refreshOne}
+					/>
+				)}
+			</Card>
+		</div>
+	);
 };

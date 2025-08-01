@@ -15,8 +15,8 @@ export const LoginPage = () => {
 		<LoginForm />
 		<div className={styles.registerLink}>
 		  <Typography.Text>
-			Ще не маєте акаунта?{' '}
-			<Link to="/register">Зареєструйтесь</Link>
+			  Don't have an account yet?{' '}
+			<Link to="/register">Sign up</Link>
 		  </Typography.Text>
 		</div>
 	  </Card>

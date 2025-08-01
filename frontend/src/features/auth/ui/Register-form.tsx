@@ -19,14 +19,13 @@ import type { RegisterDto } from '../model/types';
 
 export const RegisterForm = () => {
 	const [form] = Form.useForm<RegisterDto>();
-	const { submit, errors, isSubmitting } = useRegister();
+	const { submit, fieldErrors, formError, isSubmitting } = useRegister();
 	
 	useEffect(() => {
-		if (errors) {
-			console.log(errors);
-			form.setFields(mapErrorsToAntd(errors));
+		if (fieldErrors) {
+			form.setFields(mapErrorsToAntd(fieldErrors));
 		}
-	}, [errors, form])
+	}, [fieldErrors, form])
 
 	return (
 	<Form form={form} onFinish={submit} layout="vertical">
@@ -39,10 +38,19 @@ export const RegisterForm = () => {
 		</Form.Item>
 
 		<Form.Item>
-			<Button type="primary" htmlType="submit" block loading={isSubmitting}>
+			<Button
+				type="primary"
+				htmlType="submit"
+				block
+				loading={isSubmitting}
+				disabled={!form.isFieldsTouched(true) || isSubmitting}
+			>
 				Register
 			</Button>
 		</Form.Item>
+		{formError && (
+			<Form.Item validateStatus="error" help={formError} />
+		)}
 	</Form>
 	);
 };

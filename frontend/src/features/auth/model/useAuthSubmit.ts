@@ -6,7 +6,8 @@ import type { FieldError } from '@/shared/api/handleApiError';
 interface UseAuthSubmitResult<TDto, TResponse> {
   submit: (dto: TDto) => Promise<void>;
   data: TResponse | null;
-  errors: FieldError[] | null;
+	fieldErrors: FieldError[] | null;
+	formError: string | null;
   isSubmitting: boolean;
 }
 
@@ -36,12 +37,14 @@ export function useAuthSubmit<TDto, TResponse>(
 ): UseAuthSubmitResult<TDto, TResponse> {
   const navigate = useNavigate();
   const [data, setData] = useState<TResponse | null>(null);
-  const [errors, setErrors] = useState<FieldError[] | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+	const [fieldErrors, setFieldErrors] = useState<FieldError[] | null>(null);
+	const [formError, setFormError] = useState<string | null>(null);
+	const [isSubmitting, setIsSubmitting] = useState(false);
 
   const submit = useCallback(async (dto: TDto) => {
     setIsSubmitting(true);
-    setErrors(null);
+	  setFieldErrors(null);
+	  setFormError(null);
     try {
       const response = await apiFn(dto);
       setData(response);
@@ -51,12 +54,16 @@ export function useAuthSubmit<TDto, TResponse>(
       }
       navigate(redirectPath);
     } catch (e) {
-      const err = handleApiError(e, 'Auth failed');
-      setErrors(err);
+      const parsedError = handleApiError(e, 'Auth failed');
+	    if (typeof parsedError === 'string') {
+		    setFormError(parsedError);
+	    } else {
+		    setFieldErrors(parsedError);
+	    }
     } finally {
       setIsSubmitting(false);
     }
   }, [apiFn, redirectPath, navigate]);
 
-  return { submit, data, errors, isSubmitting };
+  return { submit, data, formError, fieldErrors, isSubmitting };
 }

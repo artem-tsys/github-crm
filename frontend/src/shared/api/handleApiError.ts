@@ -1,5 +1,3 @@
-import { message } from 'antd';
-
 export interface FieldError {
   name: string;
   errors: string[];
@@ -14,7 +12,7 @@ interface ApiError {
   };
 }
 
-export function handleApiError(e: unknown, defaultMessage: string): FieldError[] | null {
+export function handleApiError(e: unknown, defaultMessage: string): FieldError[] | string {
   const err = e as ApiError;
   if (err?.response?.status === 400 && Array.isArray(err?.response?.data?.message)) {
     // validation errors
@@ -23,10 +21,11 @@ export function handleApiError(e: unknown, defaultMessage: string): FieldError[]
       return { name: field.toLowerCase(), errors: [msg] };
     });
   }
-  message.error(
-    typeof err?.response?.data?.message === 'string'
-      ? err.response?.data.message
-      : defaultMessage
-  );
-  return null;
+	
+	const message = err.response?.data?.message;
+	if (typeof message === 'string') {
+		return message;
+	}
+	
+	return defaultMessage;
 }
