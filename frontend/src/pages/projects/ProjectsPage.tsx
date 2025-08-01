@@ -1,16 +1,19 @@
+import { useLogout } from "../../features/auth/model/useLogOut";
 import { useProjects } from "../../features/projects/model/useProjects";
 import { AddProjectForm } from "../../features/projects/ui/Add-project-form";
 import { ProjectsTable } from "../../features/projects/ui/Projects-table";
-import { Typography, Card, Alert, Spin } from 'antd';
+import { Typography, Card, Alert, Spin, Button } from 'antd';
 import styles from "./project-page.module.scss";
 
 const { Title } = Typography;
 
 export const ProjectsPage = () => {
 	const { projects, loading, error, deleteOne, refreshOne, refetch } = useProjects();
+	const logout = useLogout();
 	
 	return (
 		<div className={styles.page}>
+			<Button className={styles.logout} onClick={logout}>Logout</Button>
 			<Card className={styles.card} bordered={false}>
 				<Title level={2}>Your GitHub Projects</Title>
 				
@@ -32,13 +35,11 @@ export const ProjectsPage = () => {
 					/>
 				)}
 				
-				{!loading && !error && (
-					<ProjectsTable
-						projects={projects}
-						onDelete={deleteOne}
-						onRefresh={refreshOne}
-					/>
-				)}
+				<ProjectsTable
+					projects={projects}
+					onDelete={deleteOne}
+					onRefresh={refreshOne}
+				/>
 			</Card>
 		</div>
 	);

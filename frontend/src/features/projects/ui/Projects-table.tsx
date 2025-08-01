@@ -14,14 +14,24 @@ export const ProjectsTable = ({ projects, onDelete, onRefresh }: Props) => {
 	
 	const handleRefresh = async (id: string) => {
 		setLoadingId(id);
-		await onRefresh(id);
-		setLoadingId(null);
+		try {
+			await onRefresh(id);
+		} catch (e) {
+			console.error(e);
+		} finally {
+			setLoadingId(null);
+		}
 	};
 	
 	const handleDelete = async (id: string) => {
 		setLoadingId(id);
-		await onDelete(id);
-		setLoadingId(null);
+		try {
+			await onDelete(id);
+		} catch (e) {
+			console.error(e);
+		} finally {
+			setLoadingId(null);
+		}
 	};
 	
 	const columns = getProjectColumns({
