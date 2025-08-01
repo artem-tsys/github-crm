@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { GetUser } from "../../auth/decorators/get-user.decorator";
 import { JwtAuthGuard } from "../../auth/guards/jwt-auth.guard";
 import { User } from "../../user/entities/user.entity";
@@ -23,5 +23,21 @@ export class ProjectController {
 		@GetUser() user: User
 		) {
 		return this.projectService.addProject(dto.path, user);
+	}
+	
+	@Delete(':id')
+	async deleteProject(
+		@Param('id') id: string,
+		@GetUser() user: User
+		) {
+		return this.projectService.deleteProject(id, user);
+	}
+	
+	@Get(':id/refresh')
+	async refreshProject(
+		@Param('id') id: string,
+		@GetUser() user: User
+	) {
+		return this.projectService.refreshProject(id, user);
 	}
 }

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { User } from "../../user/entities/user.entity";
 import { Project } from '../entities/project.entity';
 import { ProjectRepository } from "../repositories/project.repository";
@@ -36,7 +36,7 @@ export class ProjectService {
  */
 	async addProject(path: string, user: User): Promise<Project> {
 		const filter = this.parsePath(path);
-		let project = await this.projectRepository.findByOwnerAndName(filter);
+		let project = await this.projectRepository.findBy(filter);
 		if(project) {
 			this.updateProject(project, user).catch(err => {
 				console.error(err); // todo: change to logger
@@ -44,6 +44,25 @@ export class ProjectService {
 			return project;
 		}
 		return await this.createNewProject(filter, user);
+	}
+	
+	/**
+	 * Refreshes project data from GitHub for the given project ID.
+	 * The project must be linked to the user.
+	 * @param id Project ID
+	 * @param user User
+	 * @returns Updated project
+	 * @throws NotFoundException if the project doesn't exist
+	 * @throws ForbiddenException if the project is not linked to the user
+	 */
+	async refreshProject(id: string, user: User): Promise<Project> {
+		const project = await this.projectRepository.findBy({ id });
+		if (!project) throw new NotFoundException('Project not found');
+		
+		const isLinked = await this.projectRepository.isLinkedToUser(project.id, user.id);
+		if (!isLinked) throw new ForbiddenException('You do not have access to this project');
+		
+		return this.updateProject(project, user);
 	}
 
 /**
@@ -92,5 +111,29 @@ export class ProjectService {
  */
 	async getProjects(user: User) {
 		return await this.projectRepository.findAllByUserId(user.id);
+	}
+	
+	/**
+	 * Deletes a project for the user.
+	 * If the project is linked to multiple users, only the relation is removed.
+	 * If it's linked only to the current user, the project is deleted entirely.
+	 * @param id Project ID
+	 * @param user User
+	 * @throws NotFoundException if project not found or not accessible
+	 */
+	async deleteProject(id: string, user: User): Promise<void> {
+		const project = await this.projectRepository.findBy({ id });
+		if (!project) throw new NotFoundException('Project not found');
+		
+		const isLinked = await this.projectRepository.isLinkedToUser(id, user.id);
+		if (!isLinked) throw new NotFoundException('Project not linked to current user');
+		
+		const totalLinks = await this.projectRepository.countLinks(id);
+		
+		if (totalLinks > 1) {
+			await this.projectRepository.removeLink(id, user.id);
+		} else {
+			await this.projectRepository.delete(id);
+		}
 	}
 }

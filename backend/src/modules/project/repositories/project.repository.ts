@@ -18,11 +18,11 @@ export class ProjectRepository {
 	) {}
 	
 	/**
-	 * Finds a project by owner and name.
-	 * @param filter Object with owner and name
+	 * Finds a project by any filter criteria (e.g. id, owner + name).
+	 * @param filter Partial project fields to match
 	 * @returns Project or null if not found
 	 */
-	async findByOwnerAndName(filter): Promise<Project | null> {
+	async findBy(filter: Partial<Project>): Promise<Project | null> {
 		return this.repo.findOne({ where: filter });
 	}
 	
@@ -77,5 +77,57 @@ export class ProjectRepository {
 			.relation(Project, 'users')
 			.of(projectId)
 			.add(userId);
+	}
+	
+	/**
+	 * Checks whether a project is linked to the given user.
+	 * @param projectId Project ID
+	 * @param userId User ID
+	 * @returns True if the user is linked to the project
+	 */
+	async isLinkedToUser(projectId: string, userId: string): Promise<boolean> {
+		const users = await this.repo
+			.createQueryBuilder()
+			.relation(Project, 'users')
+			.of(projectId)
+			.loadMany<User>();
+		return users.some(user => user.id === userId);
+	}
+	
+	/**
+	 * Counts how many users are linked to the project.
+	 * @param projectId Project ID
+	 * @returns Number of users linked to the project
+	 */
+	async countLinks(projectId: string): Promise<number> {
+		const users = await this.repo
+			.createQueryBuilder()
+			.relation(Project, 'users')
+			.of(projectId)
+			.loadMany<User>();
+		return users.length;
+	}
+	
+	/**
+	 * Removes the relation between a project and a user.
+	 * Does not delete the project entity itself.
+	 * @param projectId Project ID
+	 * @param userId User ID
+	 */
+	async removeLink(projectId: string, userId: string): Promise<void> {
+		await this.repo
+			.createQueryBuilder()
+			.relation(Project, 'users')
+			.of(projectId)
+			.remove(userId);
+	}
+	
+	/**
+	 * Deletes a project entity by ID.
+	 * This does not consider user relations; use only if project has no other owners.
+	 * @param id Project ID
+	 */
+	async delete(id: string): Promise<void> {
+		await this.repo.delete(id);
 	}
 }
