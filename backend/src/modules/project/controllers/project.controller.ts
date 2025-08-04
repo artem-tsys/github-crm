@@ -1,7 +1,8 @@
-import { Body, Controller, Delete, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { GetUser } from "../../auth/decorators/get-user.decorator";
 import { JwtAuthGuard } from "../../auth/guards/jwt-auth.guard";
 import { User } from "../../user/entities/user.entity";
+import { ProjectMapper } from "../mappers/project.mapper";
 import { ProjectService } from '../services/project.service';
 import { CreateProjectDto } from '../dtos/create-project.dto';
 
@@ -22,7 +23,12 @@ export class ProjectController {
 		@Body() dto: CreateProjectDto,
 		@GetUser() user: User
 		) {
-		return this.projectService.addProject(dto.path, user);
+		const project = await this.projectService.addProject(dto.path, user);
+		if (!project) {
+			return null;
+		}
+	
+		return ProjectMapper.toDto(project);
 	}
 	
 	@Delete(':id')
@@ -30,7 +36,11 @@ export class ProjectController {
 		@Param('id') id: string,
 		@GetUser() user: User
 		) {
-		return this.projectService.deleteProject(id, user);
+		
+		await this.projectService.deleteProject(id, user);
+		return {
+			ok: true
+		}
 	}
 	
 	@Get(':id/refresh')

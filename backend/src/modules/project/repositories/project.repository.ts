@@ -1,48 +1,44 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Project } from '../entities/project.entity';
-import { User } from '../../user/entities/user.entity';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from "@nestjs/mongoose";
+import { FilterQuery, Model } from "mongoose";
+import { ProjectEntity } from "../entities/project.entity";
+import { Project, ProjectDocument } from "../schemas/project.schema";
 
 /**
  * Repository for managing Project entities and their relations to users.
  */
 @Injectable()
 export class ProjectRepository {
-	/**
-	 * @param repo TypeORM repository for Project entity
-	 */
 	constructor(
-		@InjectRepository(Project)
-		private readonly repo: Repository<Project>
+		@InjectModel(Project.name)
+		private readonly projectModel: Model<ProjectDocument>,
 	) {}
 	
 	/**
-	 * Finds a project by any filter criteria (e.g. id, owner + name).
-	 * @param filter Partial project fields to match
-	 * @returns Project or null if not found
+	 * Finds a single project by given filter.
+	 * @param filter Mongoose filter (e.g. _id, owner+name)
+	 * @returns Project or null
 	 */
-	async findBy(filter: Partial<Project>): Promise<Project | null> {
-		return this.repo.findOne({ where: filter });
+	async findBy(filter: FilterQuery<ProjectDocument>): Promise<ProjectDocument | null> {
+		return this.projectModel.findOne(filter);
 	}
 	
 	/**
-	 * Creates a new project entity.
-	 * @param projectData Partial project data
-	 * @returns Created project
+	 * Creates a new project or returns existing one.
+	 * Links the same project to multiple users without duplication.
+	 * @param projectData Basic project data
+	 * @returns Created or existing project
 	 */
-	async create(projectData: Partial<Project>): Promise<Project> {
-		const entity = this.repo.create({ ...projectData });
-		return this.save(entity);
-	}
-	
-	/**
-	 * Saves a project entity to the database.
-	 * @param project Project entity
-	 * @returns Saved project
-	 */
-	async save(project: Project): Promise<Project> {
-		return this.repo.save(project);
+	async create(projectData): Promise<ProjectDocument | null> {
+		return this.projectModel.findOneAndUpdate({
+				owner: projectData.owner,
+				name: projectData.name
+			},
+			projectData,
+			{
+				new: true,
+				upsert: true
+			});
 	}
 	
 	/**
@@ -51,83 +47,66 @@ export class ProjectRepository {
 	 * @returns Array of projects
 	 */
 	async findAllByUserId(userId: string): Promise<Project[]> {
-		return this.repo
-			.createQueryBuilder('project')
-			.leftJoin('project.users', 'user')
-			.where('user.id = :userId', { userId })
-			.getMany();
+		try {
+			return this.projectModel.find({ userIds: userId })
+		} catch (err) {
+			console.error(err);
+			return []
+		}
 	}
 	
 	/**
-	 * Links a project to a user if not already linked.
-	 * @param projectId Project ID
-	 * @param userId User ID
+	 * Updates project data (e.g. GitHub stats).
+	 * @param project Project data with ID
+	 * @throws NotFoundException if project doesn't exist
+	 * @returns Updated project
 	 */
-	async updateLink(projectId: string, userId: string): Promise<void> {
-		const existingIds = await this.repo
-			.createQueryBuilder()
-			.relation(Project, 'users')
-			.of(projectId)
-			.loadMany<User>();
+	async update(project: ProjectEntity): Promise<Project> {
+		const updated = await this.projectModel.findByIdAndUpdate(
+			project.id,
+			project,
+			{ new: true }
+		)
 		
-		if (existingIds.find(u => u.id === userId)) return;
-		
-		await this.repo
-			.createQueryBuilder()
-			.relation(Project, 'users')
-			.of(projectId)
-			.add(userId);
+		if (!updated) {
+			throw new NotFoundException(`Project ${project.id} not found`);
+		}
+		return updated;
 	}
 	
 	/**
-	 * Checks whether a project is linked to the given user.
+	 * Adds a user ID to project.userIds (many-to-many).
 	 * @param projectId Project ID
-	 * @param userId User ID
-	 * @returns True if the user is linked to the project
+	 * @param userId User ID to link
+	 * @throws NotFoundException if project not found
+	 * @returns Updated project
 	 */
-	async isLinkedToUser(projectId: string, userId: string): Promise<boolean> {
-		const users = await this.repo
-			.createQueryBuilder()
-			.relation(Project, 'users')
-			.of(projectId)
-			.loadMany<User>();
-		return users.some(user => user.id === userId);
+	async updateLink(projectId: string, userId: string): Promise<Project> {
+		const updated = await this.projectModel.findByIdAndUpdate(
+			projectId,
+			{ $addToSet: { userIds: userId } }
+		)
+
+		if (!updated) {
+			throw new NotFoundException(`Project ${projectId} not found`);
+		}
+		return updated;
 	}
 	
 	/**
-	 * Counts how many users are linked to the project.
+	 * Unlinks a user from project. If no users left — deletes the project.
 	 * @param projectId Project ID
-	 * @returns Number of users linked to the project
+	 * @param userId User ID to unlink
 	 */
-	async countLinks(projectId: string): Promise<number> {
-		const users = await this.repo
-			.createQueryBuilder()
-			.relation(Project, 'users')
-			.of(projectId)
-			.loadMany<User>();
-		return users.length;
-	}
-	
-	/**
-	 * Removes the relation between a project and a user.
-	 * Does not delete the project entity itself.
-	 * @param projectId Project ID
-	 * @param userId User ID
-	 */
-	async removeLink(projectId: string, userId: string): Promise<void> {
-		await this.repo
-			.createQueryBuilder()
-			.relation(Project, 'users')
-			.of(projectId)
-			.remove(userId);
-	}
-	
-	/**
-	 * Deletes a project entity by ID.
-	 * This does not consider user relations; use only if project has no other owners.
-	 * @param id Project ID
-	 */
-	async delete(id: string): Promise<void> {
-		await this.repo.delete(id);
+	async delete(projectId: string, userId: string): Promise<void> {
+		const res = await this.projectModel.findOneAndUpdate(
+			{ _id: projectId },
+			{ $pull: { userIds: userId } },
+			{ new: true },
+		).exec();
+
+		if (res?.userIds.length === 0) {
+			await this.projectModel.deleteOne({ _id: projectId });
+		}
 	}
 }

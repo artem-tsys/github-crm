@@ -1,36 +1,33 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToMany, JoinTable } from 'typeorm';
-import { User } from "../../user/entities/user.entity";
+import { Expose } from 'class-transformer';
 
-@Entity('projects')
-export class Project {
-	@PrimaryGeneratedColumn('uuid')
+export class ProjectEntity {
+	@Expose({ name: '_id' })
 	id: string;
 	
-	@Column()
+	@Expose()
 	owner: string;
 	
-	@Column()
+	@Expose()
 	name: string;
 	
-	@Column()
+	@Expose()
 	url: string;
 	
-	@Column()
+	@Expose()
 	stars: number;
 	
-	@Column()
-	forks: number;
-	
-	@Column()
+	@Expose()
 	issues: number;
 	
-	@Column({ type: 'bigint' })
-	createdAt: number;
+	@Expose()
+	forks: number;
 	
-	@CreateDateColumn()
+	@Expose()
+	createdAt: Date;
+	
+	@Expose()
 	addedAt: Date;
 	
-	@ManyToMany(() => User, user => user.projects)
-	@JoinTable({ name: 'user_projects' })
-	users: User[];
+	@Expose()
+	userIds: string[];
 }

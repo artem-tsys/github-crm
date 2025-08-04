@@ -1,15 +1,15 @@
 import { HttpModule } from "@nestjs/axios";
 import { Module } from "@nestjs/common";
-import { TypeOrmModule } from "@nestjs/typeorm";
+import { MongooseModule } from "@nestjs/mongoose";
+import { MODELS } from "./config/collections.config";
 import { ProjectController } from "./controllers/project.controller";
-import { Project } from "./entities/project.entity";
 import { ProjectRepository } from "./repositories/project.repository";
 import { FetchProjectsService } from "./services/fetch-project.service";
 import { ProjectService } from "./services/project.service";
 
 @Module({
 	imports: [
-		TypeOrmModule.forFeature([Project]),
+		MongooseModule.forFeature(MODELS),
 		HttpModule,
 	],
 	controllers: [ProjectController],

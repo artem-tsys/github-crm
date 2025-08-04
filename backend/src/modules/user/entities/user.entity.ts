@@ -1,5 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToMany } from 'typeorm';
-import { Project } from "../../project/entities/project.entity";
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
 
 /**
  * Entity representing a user in the system.
@@ -17,7 +16,4 @@ export class User {
 	
 	@CreateDateColumn()
 	createdAt: Date;
-	
-	@ManyToMany(() => Project, project => project.users)
-	projects: Project[];
 }
