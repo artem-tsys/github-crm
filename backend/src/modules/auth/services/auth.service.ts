@@ -16,12 +16,12 @@ export class AuthService {
 		private userService: UserService,
 		private jwt: JwtService
 	) {}
-
+	
 	/**
 	 * Registers a new user with email and password.
 	 * @param email User email
 	 * @param password User password
-	 * @returns Created user
+	 * @returns Created user entity
 	 * @throws ConflictException if email already exists
 	 */
 	async register(email: string, password: string) {
@@ -31,12 +31,13 @@ export class AuthService {
 		const passwordHash = await bcrypt.hash(password, 10);
 		return this.userService.create(email, passwordHash);
 	}
-
+	
 	/**
-	 * Signs in a user and returns JWT token.
+	 * Signs in a user and returns access/refresh tokens and user entity.
+	 * Tokens will be set as httpOnly cookies by an interceptor.
 	 * @param email User email
 	 * @param password User password
-	 * @returns JWT access token
+	 * @returns { accessToken, refreshToken, user }
 	 * @throws UnauthorizedException if credentials are invalid
 	 */
 	async signIn(email: string, password: string) {
@@ -47,8 +48,10 @@ export class AuthService {
 			const isMatch = await bcrypt.compare(password, user.passwordHash);
 			if (!isMatch) throw new UnauthorizedException('Invalid credentials');
 			
-			const token = await this.jwt.signAsync({sub: user.id, email: user.email});
-			return { access_token: token };
+			const accessToken = await this.jwt.signAsync({ sub: user.id, email: user.email }, { expiresIn: '15m' });
+			const refreshToken = await this.jwt.signAsync({ sub: user.id }, { expiresIn: '7d' });
+			
+			return { accessToken, refreshToken, user };
 		} catch (e) {
 			console.error(e);
 			throw new UnauthorizedException('Invalid credentials');

@@ -5,6 +5,7 @@ import {
 import { ConfigService } from "@nestjs/config";
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppConfig } from "./modules/app/config/app.config";
+import * as cookieParser from 'cookie-parser';
 
 export const mainConfig = (app: INestApplication | NestExpressApplication) => {
 	const config = app.get<ConfigService<AppConfig>>(ConfigService);
@@ -18,7 +19,9 @@ export const mainConfig = (app: INestApplication | NestExpressApplication) => {
 			forbidNonWhitelisted: false,
 		}),
 	);
-
+	
+	app.use(cookieParser());
+	
 	app.enableShutdownHooks();
 	app.enableCors(corsConfig);
 };
