@@ -16,7 +16,7 @@ export const AddProjectForm = ({ onSuccess }: { onSuccess: () => void }) => {
 				name="path"
 				rules={[{ required: true, message: 'Enter in format owner/repo' }]}
 			>
-				<Input placeholder="facebook/react" />
+				<Input placeholder="facebook/react"  />
 			</Form.Item>
 			<Form.Item>
 				<Button type="primary" htmlType="submit">

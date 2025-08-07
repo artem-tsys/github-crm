@@ -1,7 +1,7 @@
 import { api } from '@/shared/api/axios';
-import type { RegisterDto, AuthResponseDto } from '../model/types';
+import type { RegisterDto, User } from '../model/types';
 
-export async function register(dto: RegisterDto): Promise<AuthResponseDto> {
-	const res = await api.post<AuthResponseDto>('/auth/register', dto);
+export async function register(dto: RegisterDto): Promise<User> {
+	const res = await api.post('/auth/register', dto);
 	return res.data;
 }

@@ -48,10 +48,6 @@ export function useAuthSubmit<TDto, TResponse>(
     try {
       const response = await apiFn(dto);
       setData(response);
-      // Store JWT token if present in response
-      if ((response as any).access_token) {
-        localStorage.setItem('access_token', (response as any).access_token);
-      }
       navigate(redirectPath);
     } catch (e) {
       const parsedError = handleApiError(e, 'Auth failed');

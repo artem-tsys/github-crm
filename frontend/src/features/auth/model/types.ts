@@ -8,6 +8,8 @@ export interface RegisterDto {
 	password: string;
 }
 
-export interface AuthResponseDto {
-	access_token: string;
+export interface User {
+	id: string;
+	email: string;
+	createdAt: number;
 }

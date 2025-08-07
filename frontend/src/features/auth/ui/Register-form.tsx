@@ -7,16 +7,15 @@ import type { RegisterDto } from '../model/types';
 /**
  * RegisterForm component
  *
- * Features & notes:
- * - Handles user registration with Ant Design Form and custom hook useRegister.
- * - Maps server-side validation errors to Antd fields for better UX.
- * - On successful registration, stores JWT token in localStorage and redirects to protected route.
- * - No global auth context is used; token is managed locally for simplicity.
- * - All logic is isolated for testability and reusability.
- * - Storing JWT in localStorage is simple but has XSS risks; consider alternatives for production.
- * - Errors are reset on new submit, so user always sees only relevant feedback.
+ * User registration form using Ant Design and useRegister hook.
+ *
+ * - Sends credentials to backend
+ * - Maps server-side errors to fields via mapErrorsToAntd
+ * - Displays global form error if needed
+ * - Disables submit if untouched or submitting
+ * - Uses autoComplete="current-password" for password field
+ * - On success, backend sets auth tokens via HTTP-only cookies and redirects
  */
-
 export const RegisterForm = () => {
 	const [form] = Form.useForm<RegisterDto>();
 	const { submit, fieldErrors, formError, isSubmitting } = useRegister();
@@ -34,7 +33,7 @@ export const RegisterForm = () => {
 		</Form.Item>
 
 		<Form.Item name="password" label="Password" rules={[{ required: true, min: 6 }]} validateTrigger="onSubmit">
-			<Input.Password />
+			<Input.Password autoComplete="current-password" />
 		</Form.Item>
 
 		<Form.Item>

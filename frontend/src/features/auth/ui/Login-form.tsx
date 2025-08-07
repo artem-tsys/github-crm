@@ -7,17 +7,15 @@ import { useSignIn } from '../model/useSignIn';
 /**
  * LoginForm component
  *
- * Key details:
- * - Integrates with Ant Design Form for built-in validation and error display.
- * - Uses custom hook useSignIn for API call, error handling, and loading state.
- * - Server-side validation errors are mapped to Antd format via mapErrorsToAntd,
- *   allowing field-level error display (UX best practice).
- * - On successful login, JWT token is stored in localStorage (note: localStorage is vulnerable to XSS).
- * - No global auth context is used for simplicity; token is read directly where needed.
- * - Errors are reset on new submit, so user always sees only relevant feedback.
- * - All form logic is isolated for testability and reusability.
+ * Sign-in form using Ant Design and useSignIn hook.
+ *
+ * - Submits credentials to backend
+ * - Maps server-side errors to Antd fields via mapErrorsToAntd
+ * - Shows global form error if needed
+ * - Disables submit during loading
+ * - Uses autoComplete="current-password" for password field
+ * - On success, backend sets auth tokens via HTTP-only cookies and redirects
  */
-
 export const LoginForm = () => {
 	const [form] = Form.useForm<SignInDto>();
 	const { submit, fieldErrors, formError, isSubmitting } = useSignIn();
@@ -35,7 +33,7 @@ export const LoginForm = () => {
 	  </Form.Item>
 
 	  <Form.Item name="password" label="Password" rules={[{ required: true, min: 6 }]} validateTrigger="onSubmit">
-		<Input.Password />
+		  <Input.Password autoComplete="current-password" />
 	  </Form.Item>
 
 	  <Form.Item>

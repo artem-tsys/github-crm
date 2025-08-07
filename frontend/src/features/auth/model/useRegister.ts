@@ -1,6 +1,6 @@
 import { useAuthSubmit } from './useAuthSubmit';
 import { register } from '../api/register';
-import type { RegisterDto, AuthResponseDto } from './types';
+import type { RegisterDto, User } from './types';
 
 export const useRegister = () =>
-  useAuthSubmit<RegisterDto, AuthResponseDto>(register, '/projects');
+  useAuthSubmit<RegisterDto, User>(register, '/projects');

@@ -6,6 +6,7 @@ import { ConfigService } from "@nestjs/config";
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppConfig } from "./modules/app/config/app.config";
 import * as cookieParser from 'cookie-parser';
+import helmet from 'helmet';
 
 export const mainConfig = (app: INestApplication | NestExpressApplication) => {
 	const config = app.get<ConfigService<AppConfig>>(ConfigService);
@@ -20,6 +21,7 @@ export const mainConfig = (app: INestApplication | NestExpressApplication) => {
 		}),
 	);
 	
+	app.use(helmet());
 	app.use(cookieParser());
 	
 	app.enableShutdownHooks();

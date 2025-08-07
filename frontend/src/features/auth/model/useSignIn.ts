@@ -1,18 +1,32 @@
+import { useEffect } from "react";
+import { useAuth } from "../context/auth-context";
 import { useAuthSubmit } from './useAuthSubmit';
 import { signIn } from '../api/sign-in';
-import type { SignInDto, AuthResponseDto } from './types';
+import type { SignInDto, User } from './types';
 
 /**
  * useSignIn hook
  *
  * Handles user sign-in logic:
- * - Calls signIn API and processes response
- * - On success, stores JWT token in localStorage and redirects to /projects
- * - Returns submit handler, error state, and loading state for UI integration
- * - Errors are mapped for Ant Design forms via useAuthSubmit
- * - No global auth context is used; token is managed locally for simplicity
- * - Designed for use in LoginForm and similar authentication flows
+ * - Calls the signIn API and processes the response
+ * - On successful login, calls refetchUser() from AuthContext to update the global user state
+ * - Automatically redirects to /projects after login
+ * - Returns the submit handler, error state, and loading state for UI integration (e.g. with Ant Design forms)
+ * - Server-side validation errors are mapped via handleApiError
+ * - All logic is encapsulated in the hook to ensure separation of concerns
+ *
+ * Intended for use in login forms such as LoginForm
  */
-
-export const useSignIn = () =>
-  useAuthSubmit<SignInDto, AuthResponseDto>(signIn, '/projects');
+export const useSignIn = () => {
+	const { refetchUser } = useAuth();
+	
+	const submitState = useAuthSubmit<SignInDto, User>(signIn, '/projects');
+	
+	useEffect(() => {
+		if (submitState.data) {
+			refetchUser(); // ⬅️ викликаємо, коли login вдався
+		}
+	}, [submitState.data, refetchUser]);
+	
+	return submitState;
+};

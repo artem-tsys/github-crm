@@ -1,12 +1,14 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from "../context/auth-context";
 
 export function useAuthCheck() {
   const navigate = useNavigate();
-  useEffect(() => {
-    const token = localStorage.getItem('access_token');
-    if (token) {
-      navigate('/projects');
-    }
-  }, [navigate]);
+	const { user, loading } = useAuth();
+	
+	useEffect(() => {
+		if (!loading && user) {
+			navigate('/projects');
+		}
+	}, [user, loading, navigate]);
 }

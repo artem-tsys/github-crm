@@ -1,4 +1,4 @@
-import { useLogout } from "../../features/auth/model/useLogOut";
+import { useSignOut } from "../../features/auth/model/useSignOut";
 import { useProjects } from "../../features/projects/model/useProjects";
 import { AddProjectForm } from "../../features/projects/ui/Add-project-form";
 import { ProjectsTable } from "../../features/projects/ui/Projects-table";
@@ -9,7 +9,7 @@ const { Title } = Typography;
 
 export const ProjectsPage = () => {
 	const { projects, loading, error, deleteOne, refreshOne, refetch } = useProjects();
-	const logout = useLogout();
+	const logout = useSignOut();
 	
 	return (
 		<div className={styles.page}>
